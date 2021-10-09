@@ -13,10 +13,12 @@ router.get('/posts', feedController.getPosts);
 router.post('/post',[
     check('title')
         .trim()
-        .isLength({min: 5}),
+        .isLength({min: 7}),
     check('title')
         .trim()
         .isLength({ min: 5 })
 ],  feedController.createPost);
+//GET a single post
+router.get('/post/:postId', feedController.getPostById);
 
 module.exports = router;

@@ -1,12 +1,14 @@
 const { validationResult } = require('express-validator')
 
+const path = require('path')
+
 const Post = require('../model/post')
 
 exports.getPosts = (req, res, next) => {
   Post.find()
-    .then((post) => {
+    .then((posts) => {
       res.status(200).json({
-        posts: post
+        posts: posts
       });
     })
     .catch((err) => {
@@ -18,19 +20,27 @@ exports.getPosts = (req, res, next) => {
 exports.createPost = (req, res, next) => {
   const error = validationResult(req)
   if(!error.isEmpty()) {
-    return res.status(422).json({
-      message: 'Validation Failed',
-      errors: error.array()
-    })
+    // const error = new Error("Validation Failed");
+    // error.statusCode = 422
+    // throw error 
+    res.json(error.array())
+  }
+  if(!req.file) {
+    const error = new Error("No image found.");
+    error.statusCode = 422
+    throw error
   }
   // Create post in db
   const title = req.body.title;
   const content = req.body.content;
+  const imageUrl = req.file.path.replace("\\", "/");
   const post = new Post({
       title: title, 
       content: content,
-      imageUrl: '/images/1.jpg',
-      creator: {name:"Opeyemi"},
+      imageUrl: imageUrl,
+      creator: {
+        name:"Opeyemi"
+      },
   })
   post
     .save()
@@ -41,7 +51,32 @@ exports.createPost = (req, res, next) => {
     })
   })
     .catch((err) => {
-      console.log(err)
+      if(err.statusCode) {
+        err.statusCode = 5
+      }
+      next(err)
     })
   
 };
+
+exports.getPostById = (req, res, next) => {
+    const id = req.params.postId
+    Post.findById(id)
+      .then((post) => { 
+        if(!post) {
+          const error = new Error("Could not find post.");
+          error.statusCode = 422
+          throw error
+        }
+        res.status(200).json({
+          message: "Post fetched",
+          post: post
+        })
+      })
+      .catch((err) => {
+        if (err.statusCode) {
+          err.statusCode = 5
+        }
+        next(err)
+      })
+}
