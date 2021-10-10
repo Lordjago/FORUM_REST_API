@@ -23,7 +23,7 @@ const storage = multer.diskStorage({
         cb(null, 'images');
     },
     filename: function (req, file, cb) {
-        cb(null, uuidv4())
+        cb(null, new Date().toISOString().replace(/:/g, '-') + '-' + file.originalname)
     }
 });
 

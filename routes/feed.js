@@ -13,12 +13,25 @@ router.get('/posts', feedController.getPosts);
 router.post('/post',[
     check('title')
         .trim()
-        .isLength({min: 7}),
+        .isLength({min: 5}),
     check('title')
         .trim()
         .isLength({ min: 5 })
 ],  feedController.createPost);
 //GET a single post
 router.get('/post/:postId', feedController.getPostById);
+//Update 
+router.put('/post/:postId', [
+    check('title')
+        .trim()
+        .isLength({ min: 5 }),
+    check('title')
+        .trim()
+        .isLength({ min: 5 })
+], feedController.updatePost)
+
+//DELETE
+
+router.delete('/post/:postId', feedController.deletePost)
 
 module.exports = router;
