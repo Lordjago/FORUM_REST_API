@@ -10,6 +10,8 @@ const MONGO_URI = process.env.CONNECTION_STRING
 
 const feedRoutes = require('./routes/feed');
 
+const authRoutes = require('./routes/auth');
+
 const path = require('path')
 
 const multer = require('multer')
@@ -50,13 +52,16 @@ app.use((req, res, next) => {
 
 app.use('/feed', feedRoutes);
 
+app.use('/auth', authRoutes);
+
 app.use((error, req, res, next) => {
     console.log(error)
     const status = error.statusCode || 500;
-
+    const data = error.data
     const message = error.message;
     res.status(status).json({
         message: message,
+        data: data
 
     })
 })

@@ -10,7 +10,7 @@ const router = express.Router();
 router.get('/posts', feedController.getPosts);
 
 // POST /feed/post
-router.post('/post',[
+router.post('/post', [
     check('title')
         .trim()
         .isLength({min: 5}),

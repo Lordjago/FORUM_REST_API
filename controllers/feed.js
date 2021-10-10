@@ -5,17 +5,30 @@ const Post = require('../model/post');
 const { clearImage } = require('../helper/function');
 
 
+
 exports.getPosts = (req, res, next) => {
-  Post.find()
-    .then((posts) => {
+  const currentPage = req.query.page || 1;
+  const POST_PER_PAGE = 2
+  let totalItems;
+  Post.find().countDocuments()
+  .then((count) => {
+    totalItems =count
+    return Post.find()
+      .skip((currentPage - 1) * POST_PER_PAGE)
+      .limit(POST_PER_PAGE)
+  })
+  .then((posts) => {
       res.status(200).json({
-        posts: posts
+        posts: posts,
+        totalItems: totalItems
       });
     })
-    .catch((err) => {
-      console.log(err)
+  .catch((err) => {
+    if (err.statusCode) {
+      err.statusCode = 500
+    }
+      next(err) 
     })
-
 };
 
 exports.createPost = (req, res, next) => {
@@ -23,7 +36,8 @@ exports.createPost = (req, res, next) => {
   if(!error.isEmpty()) {
     const error = new Error("Validation Failed");
     error.statusCode = 422
-    throw error 
+    error.data = error.array()
+    throw error
     // res.json(error.array())
   }
   if(!req.file) {
@@ -54,7 +68,7 @@ exports.createPost = (req, res, next) => {
   })
     .catch((err) => {
       if(err.statusCode) {
-        err.statusCode = 5
+        err.statusCode = 500
       }
       next(err)
     })
@@ -68,6 +82,7 @@ exports.getPostById = (req, res, next) => {
         if(!post) {
           const error = new Error("Could not find post.");
           error.statusCode = 422
+          error.data = error.array()
           throw error
         }
         res.status(200).json({
@@ -88,6 +103,7 @@ exports.updatePost = (req, res, next) => {
   if (!error.isEmpty()) {
     const error = new Error("Validation Failed");
     error.statusCode = 422
+    error.data = error.array()
     throw error
   }
   const postId = req.params.postId
@@ -138,6 +154,7 @@ exports.deletePost = (req, res, next) => {
     if (!post) {
       const error = new Error("Could not find post.");
       error.statusCode = 422
+      error.data = error.array()
       throw error
     }
     clearImage(post.imageUrl)
