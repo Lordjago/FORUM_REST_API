@@ -2,6 +2,8 @@ const { validationResult } = require('express-validator')
 
 const Post = require('../model/post');
 
+const User = require('../model/user');
+
 const { clearImage } = require('../helper/function');
 
 
@@ -22,7 +24,7 @@ exports.getPosts = (req, res, next) => {
         posts: posts,
         totalItems: totalItems
       });
-    })
+  })
   .catch((err) => {
     if (err.statusCode) {
       err.statusCode = 500
@@ -49,21 +51,28 @@ exports.createPost = (req, res, next) => {
   const title = req.body.title;
   const content = req.body.content;
   const imageUrl = req.file.path.replace("\\", "/");
-  console.log(imageUrl)
+  let creator;
   const post = new Post({
       title: title, 
       content: content,
       imageUrl: imageUrl,
-      creator: {
-        name:"Opeyemi"
-      },
+      creator: req.userId
   })
   post
     .save()
     .then((post) => {
-      res.status(201).json({
-        message: 'Post created successfully!',
-        post: post
+        return User.findById(req.userId)
+  })
+  .then((user) => {
+    creator = user;
+    user.posts.push(post);
+    return user.save()
+  })
+  .then((result) => {
+    res.status(201).json({
+      message: 'Post created successfully!',
+      post: post,
+      creator: {_id: creator._id, name: creator.name}
     })
   })
     .catch((err) => {
@@ -92,7 +101,7 @@ exports.getPostById = (req, res, next) => {
       })
       .catch((err) => {
         if (err.statusCode) {
-          err.statusCode = 5
+          err.statusCode = 500
         }
         next(err)
       })
@@ -125,21 +134,26 @@ exports.updatePost = (req, res, next) => {
       error.statusCode = 422
       throw error
     }
+    if (post.creator.toString() !== req.userId) {
+    const error = new Error("Not Authorized.");
+    error.statusCode = 403
+    throw error
+  }
     if(imageUrl !== post.imageUrl) {
       clearImage(post.imageUrl)
     }
     post.title = title;
     post.content = content;
     post.imageUrl = imageUrl;
-
     return post.save();
   })
   .then((result) => {
     res.status(200).json({message: "Updated"})
+    console.log(result)
   })
   .catch((err) => {
     if (err.statusCode) {
-      err.statusCode = 5
+      err.statusCode = 500
     }
     next(err)
   })
@@ -154,19 +168,31 @@ exports.deletePost = (req, res, next) => {
     if (!post) {
       const error = new Error("Could not find post.");
       error.statusCode = 422
-      error.data = error.array()
+      // error.data = error.array()
       throw error
     }
-    clearImage(post.imageUrl)
+    if (post.creator.toString() !== req.userId) {
+      const error = new Error("Not Authorized.");
+      error.statusCode = 403
+      throw error
+    }
+    //clear image from local storage
+    clearImage(post.imageUrl);
     return Post.findByIdAndRemove(postId)
-    
   })
   .then((result) => {
-    res.status(200).json({message: 'Deleted Post.'})
+    User.findById(req.userId)
+      .then((user) => {
+        user.posts.pull(postId)
+        return user.save()
+    })
+  })
+  .then((result) => {
+    res.status(200).json({ message: 'Deleted Post.' })
   })
   .catch((err) => {
       if (err.statusCode) {
-        err.statusCode = 5
+        err.statusCode = 500
       }
       next(err)
     })

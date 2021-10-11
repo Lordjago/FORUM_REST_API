@@ -20,7 +20,7 @@ const userSchema = new Schema({
         require: true,
         default: "I am new"
     },
-    post: [
+    posts: [
         {
         type: Schema.Types.ObjectId,
         ref: 'Post'
