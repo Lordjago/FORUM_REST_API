@@ -8,47 +8,41 @@ const jwt = require('jsonwebtoken')
 
 require('dotenv').config()
 
-exports.signup = (req, res, next) => { 
+exports.signup = async (req, res, next) => { 
     const { email, name, password } = req.body;
     const error = validationResult(req)
     if (!error.isEmpty()) {
-        // const error = new Error("Validation Failed");
-        // error.statusCode = 422
-        // // error.data = error.array()
-        // throw error
-        console.log(error.array())
+        const error = new Error("Validation Failed");
+        error.statusCode = 422
+        // error.data = error.array()
+        throw error
+        // console.log(error.array())
     }
-    User.findOne({ email: email })
-    .then((user) => {
-         if (user) {
+    try {
+        const exist = await User.findOne({ email: email })
+         if (exist) {
               return Promise.reject("Email address already exist")
         }
-        bcrypt.hash(password, 12)
-        .then((hashedPassword => {
-            const user = new User({
+    const hashedPassword = await bcrypt.hash(password, 12)
+    
+    const user = new User({
                 email: email,
                 password: hashedPassword,
                 name: name 
             })
-            return user.save()
-        }))
-   })
-    .then((result) => {
-        res.status(201).json({message: "User created"})
-    })
-    .catch((err) => {
-        if (err.statusCode) {
-                err.statusCode = 5
+    await user.save()
+    res.status(201).json({message: "User created"})
+    } catch (error) {
+        if (!error.statusCode) {
+                error.statusCode = 5
         }
-            next(err)
-        })
-    
+            next(error)
+    }
 
 }
 
-exports.login = (req, res, next) => {
+exports.login = async (req, res, next) => {
     const {email, password} = req.body
-    let loadedUser;
     const error = validationResult(req)
     if(!error.isEmpty()) {
         const error = new Error("Validation Failed");
@@ -56,79 +50,70 @@ exports.login = (req, res, next) => {
         // error.data = error.array()
         throw error
     }
-    User.findOne({email: email})
-    .then((user) => {
+    try {
+         const user = await User.findOne({email: email})
         if(!user) {
             const error = new Error("User with this email does not exist");
             error.statusCode = 401
             throw error
         }
-        loadedUser = user;
-        return bcrypt.compare(password, user.password)
-    })
-    .then((isEqual) => {
+    const isEqual = bcrypt.compare(password, user.password)
        if(!isEqual) {
            const error = new Error("Password do not match");
-        //    error.statusCode = 401;
+           error.statusCode = 401;
            throw error;
        }
-       const token = jwt.sign({email: loadedUser.email, userId: loadedUser._id}, process.env.ACCESS_TOKEN, {expiresIn: '1h'})
+       const token = jwt.sign({email: user.email, userId: user._id}, process.env.ACCESS_TOKEN, {expiresIn: '1h'})
 
        res.status(201).json({
            message:"Success", 
            token: token, 
-           userId: loadedUser._id
+           userId: user._id
         })
-    })
-    .catch((err) => {
-            if (err.statusCode) {
-                err.statusCode = 5
+    } catch (error) {
+        if (!error.statusCode) {
+                error.statusCode = 5
             }
-            next(err)
-        })
+            next(error)
+    }
 
 }
 
-exports.getStatus = (req, res, next) => {
-    User.findById(req.userId)
-        .then((user) => {
+exports.getStatus = async (req, res, next) => {
+    try {
+        const user = await User.findById(req.userId)
             if (!user) {
                 const error = new Error("User not Found");
                 error.statusCode = 404
                 throw error
             }
             res.status(200).json({status: user.status})
-        })
-        .catch((err) => {
-            if (err.statusCode) {
-                err.statusCode = 500
+    } catch (error) {
+         if (!error.statusCode) {
+                error.statusCode = 500
             }
-            next(err)
-        })
-
+            next(error)
+    }
 }
 
-exports.updateUserStatus = (req, res, next) => {
+exports.updateUserStatus = async (req, res, next) => {
     const newStatus = "req.body.status"
     console.log(newStatus)
-    User.findById(req.userId)
-        .then((user) => {
+    try {
+        const user = await User.findById(req.userId)
             if (!user) {
                 const error = new Error("User not Found");
                 error.statusCode = 404
                 throw error
             }
             user.status = newStatus;
-            return user.save()
-        })
-        .then((result) => {
-            res.status(200).json({ message: "User status Updated" })
-        })
-        .catch((err) => {
-            if (err.statusCode) {
-                err.statusCode = 500
+    await user.save()
+    res.status(200).json({ message: "User status Updated" })
+    } catch (error) {
+        if (!error.statusCode) {
+                error.statusCode = 500
             }
-            next(err)
-        })
+            next(error)
+    }
 
 }
