@@ -3,15 +3,16 @@ require('dotenv').config()
 const jwt = require('jsonwebtoken')
 
 module.exports = (req, res, next) => {
-    const authHeader = req.get('Authorization').split(' ')[1];
+    const authHeader = req.get('Authorization')
     if (!authHeader) {
-        const error = new Error('Token is require for Authorization.');
+        const error = new Error('Not Authenticated.');
         error.statusCode = 401;
         throw error;
     }
     try {
+        const token = authHeader.split(' ')[1];
         if(authHeader) {
-            jwt.verify(authHeader, process.env.ACCESS_TOKEN, (err, decodedToken) => {
+            jwt.verify(token, process.env.ACCESS_TOKEN, (err, decodedToken) => {
                 if(err) {
                     const error = new Error('Invalid Access Token.');
                     error.statusCode = 401;
