@@ -1,14 +1,17 @@
-const { validationResult } = require('express-validator')
+import { validationResult }from 'express-validator'
 
-const Post = require('../model/post');
+import Post from '../model/post.js'
 
-const User = require('../model/user');
+import User from '../model/user.js'
 
-const { clearImage } = require('../helper/function');
+import { clearImage } from '../helper/function.js'
 
 
+export const getIndex = (req, res) => {
+  res.json({message: "I'm working"})
+}
 
-exports.getPosts = async (req, res, next) => {
+export const getPosts = async (req, res, next) => {
   const currentPage = req.query.page || 1;
   const POST_PER_PAGE = 2
   try {
@@ -30,7 +33,7 @@ exports.getPosts = async (req, res, next) => {
     
 };
 
-exports.createPost = async (req, res, next) => {
+export const createPost = async (req, res, next) => {
   const error = validationResult(req)
   if(!error.isEmpty()) {
     const error = new Error("Validation Failed");
@@ -72,7 +75,7 @@ exports.createPost = async (req, res, next) => {
   }  
 };
 
-exports.getPostById = async (req, res, next) => {
+export const getPostById = async (req, res, next) => {
     const id = req.params.postId
     try {
       const post = await Post.findById(id) 
@@ -95,7 +98,7 @@ exports.getPostById = async (req, res, next) => {
     
 }
 
-exports.updatePost = async (req, res, next) => {
+export const updatePost = async (req, res, next) => {
   const error = validationResult(req)
   if (!error.isEmpty()) {
     const error = new Error("Validation Failed");
@@ -146,7 +149,7 @@ exports.updatePost = async (req, res, next) => {
 
 }
 
-exports.deletePost = async (req, res, next) => {
+export const deletePost = async (req, res, next) => {
   const postId = req.params.postId
   try {
     const post = await Post.findById(postId)

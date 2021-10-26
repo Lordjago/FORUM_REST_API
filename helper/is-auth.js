@@ -1,8 +1,10 @@
-require('dotenv').config()
+// require('dotenv').config()
+import {} from 'dotenv/config'
 
-const jwt = require('jsonwebtoken')
+// const jwt = require('jsonwebtoken')
+import jwt from 'jsonwebtoken'
 
-module.exports = (req, res, next) => {
+export default  (req, res, next) => {
     const authHeader = req.get('Authorization')
     if (!authHeader) {
         const error = new Error('Not Authenticated.');

@@ -1,24 +1,29 @@
-require('dotenv').config()
+// require('dotenv').config()
+import {} from 'dotenv/config'
 
-const express = require('express');
+import express from 'express'
 
-const bodyParser = require('body-parser');
+import bodyParser from 'body-parser'
 
-const mongoose = require('mongoose');
+import mongoose from 'mongoose'
+
+import feedRoutes from './routes/feed.js'
+
+import authRoutes from './routes/auth.js'
+
+import path, { dirname} from 'path'
+
+import { fileURLToPath } from 'url';
+
+const __dirname = dirname(fileURLToPath(import.meta.url));
+
+import multer from 'multer'
+
+const app = express()
 
 const MONGO_URI = process.env.CONNECTION_STRING
 
-const feedRoutes = require('./routes/feed');
-
-const authRoutes = require('./routes/auth');
-
-const path = require('path')
-
-const multer = require('multer')
-
-const app = express();
-
-const { v4: uuidv4 } = require('uuid');
+// import { v4: uuidv4 } from 'uuid'
 
 const storage = multer.diskStorage({
     destination: function (req, file, cb) {
@@ -69,11 +74,12 @@ app.use((error, req, res, next) => {
 mongoose.connect(MONGO_URI)
 .then(() => {
     console.log("Database Connection Successfull")
-    const server = app.listen(8080, console.log("Server running on port 8080"));
-    const io = require('socket.io')(server)
-    io.on('connection', socket => {
-        console.log("Client Connected")
-    })
+    // const server = 
+    app.listen(process.env.PORT || 8080, console.log("Server running on port 8080"));
+    // const io = require('socket.io')(server)
+    // io.on('connection', socket => {
+    //     console.log("Client Connected")
+    // })
 })
 .catch((err) => {
     console.log(err)

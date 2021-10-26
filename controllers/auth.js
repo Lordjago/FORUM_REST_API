@@ -1,14 +1,16 @@
-const User = require('../model/user')
+import User from '../model/user.js'
 
-const { validationResult } = require('express-validator')
+import { validationResult } from 'express-validator'
 
-const bcrypt = require('bcryptjs')
+import bcrypt from 'bcryptjs'
 
-const jwt = require('jsonwebtoken')
+import jwt from 'jsonwebtoken'
 
-require('dotenv').config()
+import {} from 'dotenv/config'
 
-exports.signup = async (req, res, next) => { 
+// require('dotenv').config()
+
+export const _signup = async (req, res, next) => { 
     const { email, name, password } = req.body;
     const error = validationResult(req)
     if (!error.isEmpty()) {
@@ -41,7 +43,7 @@ exports.signup = async (req, res, next) => {
 
 }
 
-exports.login = async (req, res, next) => {
+export const _login = async (req, res, next) => {
     const {email, password} = req.body
     const error = validationResult(req)
     if(!error.isEmpty()) {
@@ -57,29 +59,30 @@ exports.login = async (req, res, next) => {
             error.statusCode = 401
             throw error
         }
-    const isEqual = bcrypt.compare(password, user.password)
-       if(!isEqual) {
-           const error = new Error("Password do not match");
-           error.statusCode = 401;
-           throw error;
-       }
-       const token = jwt.sign({email: user.email, userId: user._id}, process.env.ACCESS_TOKEN, {expiresIn: '1h'})
+        const isEqual = bcrypt.compare(password, user.password)
+        if(!isEqual) {
+            const error = new Error("Password do not match");
+            error.statusCode = 401;
+            throw error;
+        }
+        const token = jwt.sign({email: user.email, userId: user._id}, process.env.ACCESS_TOKEN, {expiresIn: '1h'})
 
-       res.status(201).json({
-           message:"Success", 
-           token: token, 
-           userId: user._id
-        })
+        res.status(201).json({
+            message:"Success", 
+            token: token, 
+            userId: user._id
+            })
     } catch (error) {
         if (!error.statusCode) {
-                error.statusCode = 5
+                error.statusCode = 500
             }
             next(error)
+            return error
     }
 
 }
 
-exports.getStatus = async (req, res, next) => {
+export const _getStatus = async (req, res, next) => {
     try {
         const user = await User.findById(req.userId)
             if (!user) {
@@ -96,7 +99,7 @@ exports.getStatus = async (req, res, next) => {
     }
 }
 
-exports.updateUserStatus = async (req, res, next) => {
+export const _updateUserStatus = async (req, res, next) => {
     const newStatus = "req.body.status"
     console.log(newStatus)
     try {

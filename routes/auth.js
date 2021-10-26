@@ -1,19 +1,20 @@
-const express = require('express')
+// const express = require('express')
+import express from 'express'
 
 const router = express.Router();
 
-const isAuth = require('../helper/is-auth')
+import isAuth from '../helper/is-auth.js'
 
-const authController = require('../controllers/auth');
+import {_signup, _login, _getStatus, _updateUserStatus} from '../controllers/auth.js'
 
-const { signup, login, status } = require('../helper/validator');
+import { signup, login, status } from '../helper/validator.js'
 
-router.put('/signup', signup, authController.signup )
+router.put('/signup', signup, _signup )
 
-router.post('/login', login, authController.login)
+router.post('/login', login, _login)
 
-router.get('/status', isAuth, authController.getStatus)
+router.get('/status', isAuth, _getStatus)
 
-router.patch('/status', status, isAuth, authController.updateUserStatus)
+router.patch('/status', status, isAuth, _updateUserStatus)
 
-module.exports = router
+export default router

@@ -1,26 +1,41 @@
-require('express-router-group')
+// require('express-router-group')
+import 'express-router-group'
 
-const express = require('express');
+// const express = require('express');
 
-const feedController = require('../controllers/feed');
+import express from 'express'
+
+// const feedController = require('../controllers/feed');
+import { 
+    getIndex,
+    getPosts, 
+    createPost,
+    getPostById,
+    updatePost,
+    deletePost
+ } from '../controllers/feed.js'
 
 const router = express.Router();
 
-const isAuth = require('../helper/is-auth')
+// const isAuth = require('../helper/is-auth')
+import isAuth from '../helper/is-auth.js'
 
-const {create, update} = require('../helper/validator')
+import {create, update} from '../helper/validator.js'
+
 
 
 // GET /feed/posts
-router.get('/posts', isAuth, feedController.getPosts);
+router.get('/', getIndex);
+// GET /feed/posts
+router.get('/posts', isAuth, getPosts);
 // POST /feed/post
-router.post('/post', create, isAuth, feedController.createPost);
+router.post('/post', create, isAuth, createPost);
 //GET a single post
-router.get('/post/:postId', isAuth, feedController.getPostById);
+router.get('/post/:postId', isAuth, getPostById);
 //Update 
-router.put('/post/:postId', isAuth, update, feedController.updatePost)
+router.put('/post/:postId', isAuth, update, updatePost)
 //DELETE
-router.delete('/post/:postId', isAuth, feedController.deletePost)
+router.delete('/post/:postId', isAuth, deletePost)
 
 // router.group('/feed',  (router) => {
 //     // GET /feed/posts
@@ -36,4 +51,4 @@ router.delete('/post/:postId', isAuth, feedController.deletePost)
 // })
 
 
-module.exports = router;
+export default router;
