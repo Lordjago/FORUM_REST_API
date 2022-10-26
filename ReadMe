@@ -1,0 +1,61 @@
+Response Body
+/feed/
+{"token": String}
+Home Directory
+200
+{"status": "Success", "message": "String"}
+/feed/post
+{"title": String,"content": String, "imageUrl": String, "creator": String}
+Creating a post
+201
+{"message": String, "post": Array, "creator": Object}
+/feed/posts
+{"page": Number}
+Getting all post
+200
+{"post": Array, "TotalItems": Number}
+/feed/post/postId
+{"token": String, "postId": Number}
+Get post by Id
+200
+{"post": Array, "message": String}
+/feed/post/postId
+{"title": String,"content": String, "imageUrl": String, "creator": String}
+Update Post by Id
+200
+{"post": Array, "message": String}
+/feed/post/postId
+{"token": String, "postId": Number}
+Delete post by Id
+200
+{"post": Array, "message": String}
+/auth/signup
+{"email": String, "name" : String, "password": String}
+Create User
+201
+{"message": String}
+/auth/login
+{"email": String,password": String}
+Authenticate User
+200
+{"message": String, "Token": String, userId: ObjectID}
+
+{"message": String, "Token": String, userId: ObjectID}
+/auth/status
+{"token": String}
+Get user status
+200
+{"status": Sting}
+/auth/status
+{"token": String, "status": String}
+Update user status
+200
+{"message": String}
+URL
+
+Body
+
+Description
+
+Code
+

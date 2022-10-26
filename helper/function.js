@@ -11,7 +11,6 @@ import { fileURLToPath } from 'url';
 
 const __dirname = dirname(fileURLToPath(import.meta.url));
 
-
 export const clearImage = (filePath) => {
     filePath = path.join(__dirname, '..', filePath);
     fs.unlink(filePath, err => console.log(err))

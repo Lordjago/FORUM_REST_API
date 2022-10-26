@@ -9,7 +9,7 @@ import {_signup, _login, _getStatus, _updateUserStatus} from '../controllers/aut
 
 import { signup, login, status } from '../helper/validator.js'
 
-router.put('/signup', signup, _signup )
+router.post('/signup', signup, _signup )
 
 router.post('/login', login, _login)
 
